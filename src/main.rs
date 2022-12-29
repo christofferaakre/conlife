@@ -1,5 +1,3 @@
-use image::{Rgb, RgbImage};
-
 #[derive(Debug, Clone)]
 pub struct Cell {
     neighbour_indices: Vec<(usize, usize)>,
@@ -29,9 +27,6 @@ pub struct Grid {
     pub height: u32,
     pub cells: Vec<Vec<Cell>>,
 }
-
-const GREEN: Rgb<u8> = Rgb([0, 255, 0]);
-const RED: Rgb<u8> = Rgb([255, 0, 0]);
 
 pub enum HorizontalEdge {
     Left,
@@ -128,29 +123,7 @@ impl Grid {
                 .alive = true;
         }
     }
-
-    pub fn draw(&self) -> RgbImage {
-        let mut image = RgbImage::new(self.width, self.height);
-        for (x, row) in self.cells.iter().enumerate() {
-            for (y, cell) in row.iter().enumerate() {
-                let color = match cell.alive {
-                    true => GREEN,
-                    false => RED,
-                };
-
-                image.put_pixel(x as u32, y as u32, color);
-            }
-        }
-
-        image
-    }
 }
-
-const WIDTH: u32 = 16;
-const HEIGHT: u32 = 16;
-
-const TARGET_WIDTH: u32 = 512;
-const TARGET_HEIGHT: u32 = 512;
 
 pub struct Object {
     pub pixels: Vec<(usize, usize)>,
@@ -190,24 +163,5 @@ fn main() {
 
     let glider = Object::from_file("data/glider.life");
     grid.load_object(&glider, (0, 0));
-
-    for generation in 0..10 {
-        println!("Generation {}", generation);
-        let filename = format!("out/generation-{}.png", generation);
-
-        let image = grid.draw();
-        let image = image::imageops::resize(
-            &image,
-            TARGET_WIDTH,
-            TARGET_HEIGHT,
-            image::imageops::FilterType::Nearest,
-        );
-        grid.advance();
-        image.save(filename).expect("Failed to save file");
-    }
-
-    // std::process::Command::new("sxiv")
-    //     .arg(filename)
-    //     .output()
-    //     .expect("Failed to execute sxiv");
+    grid.advance();
 }
