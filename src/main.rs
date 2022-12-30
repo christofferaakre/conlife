@@ -10,23 +10,17 @@ use open_oak::{
     init::{init, Game},
     resource_manager::ResourceManager,
     shapes::rect::Rectangle,
-    traits::{Renderable, Shaders, Texture},
+    traits::{Renderable, Shaders},
 };
 
 use open_oak::Surface;
 use open_oak::{Rad, Rgba, Vector2};
 
-struct Cell<'a> {
-    rect: Rectangle,
-    cell: &'a mut life::Cell,
-}
-
 fn main() {
-    let mut grid = Grid::new(16, 16);
+    let mut grid = Grid::new(64, 64);
 
     let glider = Object::from_file("objects/glider.life");
     grid.load_object(&glider, (0, 0));
-    // grid.advance();
 
     let game = init();
 
@@ -70,11 +64,10 @@ fn main() {
         })
         .collect();
 
-    let mut pressed_keys: HashSet<VirtualKeyCode> = HashSet::new();
-
     const SECONDS_PER_GENERATION: f32 = 0.1;
     let mut timer = Duration::new(0, 0);
 
+    let mut pressed_keys: HashSet<VirtualKeyCode> = HashSet::new();
     let mut last_frame = Instant::now();
     // game loop
     event_loop.run(move |ev, _, _control_flow| {
