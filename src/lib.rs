@@ -1,7 +1,7 @@
 #[derive(Debug, Clone)]
 pub struct Cell {
     neighbour_indices: Vec<(usize, usize)>,
-    alive: bool,
+    pub alive: bool,
 }
 
 impl Cell {
@@ -116,9 +116,9 @@ impl Grid {
     pub fn load_object(&mut self, object: &Object, offset: (usize, usize)) {
         for (x, y) in &object.pixels {
             self.cells
-                .get_mut(*x + offset.0)
-                .unwrap()
                 .get_mut(*y + offset.1)
+                .unwrap()
+                .get_mut(*x + offset.0)
                 .unwrap()
                 .alive = true;
         }
