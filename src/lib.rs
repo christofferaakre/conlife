@@ -1,3 +1,27 @@
+//! Library crate implmenting a backend for Conway's Game of Life (See
+//! <https://en.wikipedia.org/wiki/Conway's_Game_of_Life>). The backend
+//! is simple and provides a pre-defined width/height grid, i.e. it does not expand.
+//! This crate does not implmement a frontend to actually display the grid,
+//! you will have to use a separate crate for that or write your own.
+//! # Usage example
+//! ```
+//! use conlife::{Grid, Object};
+//!
+//! let mut grid = Grid::new(16, 16);
+//! let glider = Object::from_string("(0,2) (1,2) (2,2) (1,0) (2,1)");
+//! // Load glider at (0,0)
+//! grid.load_object(&glider, (0,0));
+//! // advance by 10 generations
+//! for _ in 0..10 {
+//!     grid.advance();
+//! }
+//!
+//! /* More code here to e.g. display the grid using a frontend */
+//!
+//!
+//! ```
+/// Struct representing a simple cell on a grid. When initialising
+/// a [`Grid`], the neighbour indices for each cell are pre-calculated.
 #[derive(Debug, Clone)]
 pub struct Cell {
     neighbour_indices: Vec<(usize, usize)>,
@@ -5,13 +29,13 @@ pub struct Cell {
 }
 
 impl Cell {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             alive: false,
             neighbour_indices: vec![],
         }
     }
-    pub fn neighbour_count(&self, cells: &Vec<Vec<Cell>>) -> u32 {
+    fn neighbour_count(&self, cells: &Vec<Vec<Cell>>) -> u32 {
         let mut neighbour_count = 0;
         for &position in &self.neighbour_indices {
             neighbour_count += cells[position.0][position.1].alive as u32;
@@ -21,6 +45,8 @@ impl Cell {
     }
 }
 
+/// The main struct provided by this crate. A grid contains many [`Cell`]s,
+/// each of which can be alive or dead.
 #[derive(Debug)]
 pub struct Grid {
     pub width: u32,
@@ -28,19 +54,9 @@ pub struct Grid {
     pub cells: Vec<Vec<Cell>>,
 }
 
-pub enum HorizontalEdge {
-    Left,
-    Right,
-    NoEdge,
-}
-
-pub enum VerticalEdge {
-    Top,
-    Bottom,
-    NoEdge,
-}
-
 impl Grid {
+    /// Initialise a new grid. Use this instead of manually creating a new instance,
+    /// as this function will pre-calculate the neighboiur indices for each cell.
     pub fn new(width: u32, height: u32) -> Self {
         let mut cells = vec![];
         for _ in 0..height {
@@ -60,6 +76,7 @@ impl Grid {
         grid
     }
 
+    /// Advance the grid by one generation.
     pub fn advance(&mut self) {
         let old_cells = self.cells.clone();
         for row in self.cells.iter_mut() {
@@ -80,7 +97,7 @@ impl Grid {
         }
     }
 
-    pub fn compute_neighbour_indices(&mut self) {
+    fn compute_neighbour_indices(&mut self) {
         for (x, row) in self.cells.iter_mut().enumerate() {
             for (y, cell) in row.iter_mut().enumerate() {
                 let mut x_indices = vec![x];
@@ -113,6 +130,7 @@ impl Grid {
         }
     }
 
+    /// Load an [`Object`] into the grid a the specified position position
     pub fn load_object(&mut self, object: &Object, offset: (usize, usize)) {
         for (x, y) in &object.pixels {
             self.cells
@@ -125,17 +143,28 @@ impl Grid {
     }
 }
 
+/// Struct representing objects that can be loaded onto the grid.
+/// You can for example load just one object, and then that object represents your entire
+/// initial starting state for the grid, or you can for example have one object that represents
+/// a glider, and load two gliders onto the grid at different positions.
 pub struct Object {
     pub pixels: Vec<(usize, usize)>,
 }
 
 impl Object {
+    /// Load an object from a file, usually with a `.life` extension, but this is not required.
+    /// [`Self::from_string`] calls this function under the hood,
+    /// so you can refer to its documentation to see what the format of the string should be.
+    /// Sample files defining various objects can be found at <https://github.com/christofferaakre/conlife/tree/master/objects>.
     pub fn from_file(filename: &str) -> Self {
         let file_contents = std::fs::read_to_string(filename).expect("Failed to read file");
-        Self::from_string(file_contents)
+        Self::from_string(file_contents.as_str())
     }
 
-    fn from_string(buffer: String) -> Object {
+    /// Load an object from a string. The string should contain ordered (x,y) coordinate pairs, separated by whitespace.
+    /// Below is an example that defines a glider:
+    /// `(0,2) (1,2) (2,2) (1,0) (2,1)`
+    pub fn from_string(buffer: &str) -> Object {
         let mut pixels = vec![];
         let buffer = buffer.replace("(", "");
         let buffer = buffer.replace(")", "");
