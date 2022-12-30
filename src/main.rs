@@ -48,7 +48,7 @@ fn main() {
         .map(|(y, row)| {
             row.iter()
                 .enumerate()
-                .map(|(x, cell)| {
+                .map(|(x, _)| {
                     Rectangle::new(
                         Vector2::new(
                             ((x as f32) * 1.0 + 0.5) / grid.width as f32,
@@ -106,7 +106,7 @@ fn main() {
 
 fn handle_keyboard_input(
     keyboard_input: open_oak::glutin::event::KeyboardInput,
-    pressed_keys: &HashSet<VirtualKeyCode>,
+    _pressed_keys: &HashSet<VirtualKeyCode>,
 ) {
     match keyboard_input.virtual_keycode.unwrap() {
         VirtualKeyCode::Escape => {
