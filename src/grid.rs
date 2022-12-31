@@ -19,7 +19,7 @@ impl Cell {
     fn neighbour_count(&self, cells: &Vec<Vec<Cell>>) -> u32 {
         let mut neighbour_count = 0;
         for &position in &self.neighbour_indices {
-            neighbour_count += cells[position.0][position.1].alive as u32;
+            neighbour_count += cells[position.1][position.0].alive as u32;
         }
 
         neighbour_count
@@ -93,25 +93,37 @@ impl Grid {
     }
 
     fn compute_neighbour_indices(&mut self) {
-        for (x, row) in self.cells.iter_mut().enumerate() {
-            for (y, cell) in row.iter_mut().enumerate() {
+        for (y, row) in self.cells.iter_mut().enumerate() {
+            for (x, cell) in row.iter_mut().enumerate() {
                 let mut x_indices = vec![x];
                 let mut y_indices = vec![y];
 
                 if x != 0 {
-                    x_indices.push(x - 1);
+                    let i = x - 1;
+                    if self.width > i as u32 {
+                        x_indices.push(i);
+                    }
                 }
 
                 if x != self.width as usize - 1 {
-                    x_indices.push(x + 1);
+                    let i = x + 1;
+                    if self.width > i as u32 {
+                        x_indices.push(i);
+                    }
                 }
 
                 if y != 0 {
-                    y_indices.push(y - 1);
+                    let i = y - 1;
+                    if self.height > i as u32 {
+                        y_indices.push(i);
+                    }
                 }
 
                 if y != self.height as usize - 1 {
-                    y_indices.push(y + 1);
+                    let i = y + 1;
+                    if self.height > i as u32 {
+                        y_indices.push(i);
+                    }
                 }
 
                 for neighbour_x in x_indices {
@@ -211,7 +223,6 @@ pub mod test {
             .map(|(x, y)| (x + offset.0, y + offset.1))
             .collect();
 
-        println!("{:?}", alive);
         grid.print_alive_cells();
 
         for (y, row) in grid.cells.iter_mut().enumerate() {
