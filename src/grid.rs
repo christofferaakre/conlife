@@ -1,4 +1,5 @@
 //! Module exposing the API for creating and interacting with a grid of cells.
+//!
 use crate::Object;
 /// Struct representing a simple cell on a grid. When initialising
 /// a [`Grid`], the neighbour indices for each cell are pre-calculated.
@@ -127,11 +128,17 @@ impl Grid {
     /// Load an [`Object`] into the grid a the specified position position
     pub fn load_object(&mut self, object: &Object, offset: (usize, usize)) {
         for (x, y) in &object.coordinates {
+            let error_msg = format!(
+                "Position {:?} is out of bounds for grid of size ({}, {})",
+                (*x + offset.0, *y + offset.1),
+                self.width,
+                self.height
+            );
             self.cells
                 .get_mut(*y + offset.1)
-                .unwrap()
+                .expect(&error_msg)
                 .get_mut(*x + offset.0)
-                .unwrap()
+                .expect(&error_msg)
                 .alive = true;
         }
     }
